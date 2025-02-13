@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Textual Reasoning Chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #343541;
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .app-container {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 300px;
+      background-color: #202123;
+      padding: 20px;
+      border-right: 1px solid #444654;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      margin-bottom: 20px;
+    }
+
+    .new-chat {
+      width: 100%;
+      padding: 12px;
+      background-color: #10a37f;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .new-chat:hover {
+      background-color: #0e8c6a;
+    }
+
+    .chat-history {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .chat-item {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      background-color: #2a2c33;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .chat-item:hover {
+      background-color: #3a3c43;
+    }
+
+    .chat-item.active {
+      background-color: #10a37f;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #343541;
+    }
+
+    .chat-header {
+      padding: 20px;
+      border-bottom: 1px solid #444654;
+      display: flex;
+      align-items: center;
+      background-color: #202123;
+    }
+
+    .chat-header h2 {
+      font-size: 24px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .message {
+      max-width: 70%;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      opacity: 0;
+      animation: fadeIn 0.3s forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .user-message {
+      background-color: #10a37f;
+      align-self: flex-end;
+    }
+
+    .bot-message {
+      background-color: #444654;
+      align-self: flex-start;
+    }
+
+    .input-container {
+      padding: 20px;
+      border-top: 1px solid #444654;
+      display: flex;
+      background-color: #202123;
+    }
+
+    .input-container input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #444654;
+      border-radius: 4px;
+      background-color: #2a2c33;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .input-container button {
+      margin-left: 10px;
+      padding: 12px 20px;
+      background-color: #10a37f;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .input-container button:hover {
+      background-color: #0e8c6a;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <button id="newChatButton" class="new-chat">+ New Chat</button>
+      </div>
+      <div class="chat-history" id="chatHistory">
+        <div class="chat-item active" onclick="selectChat(this)">Chat 1</div>
+        <div class="chat-item" onclick="selectChat(this)">Chat 2</div>
+        <div class="chat-item" onclick="selectChat(this)">Chat 3</div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="chat-header">
+        <h2>Chat</h2>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+      </div>
+      <div class="input-container">
+        <input type="text" id="userInput" placeholder="Type your message..." />
+        <button id="sendButton">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('sendButton').addEventListener('click', sendMessage);
+    document.getElementById('userInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    function sendMessage() {
+      const userInput = document.getElementById('userInput');
+      const messageText = userInput.value.trim();
+      if (!messageText) return;
+
+      addMessage(messageText, 'user');
+      userInput.value = '';
+
+      setTimeout(() => {
+        const botResponse = generateBotResponse(messageText);
+        addMessage(botResponse, 'bot');
+      }, 500);
+    }
+
+    function addMessage(text, sender) {
+      const chatMessages = document.getElementById('chatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+      messageDiv.textContent = text;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function generateBotResponse(userMessage) {
+      return "This is a simulated response to: " + userMessage;
+    }
+
+    function selectChat(element) {
+      document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+      document.getElementById('chatMessages').innerHTML = '';
+    }
+
+    document.getElementById('newChatButton').addEventListener('click', () => {
+      document.getElementById('chatMessages').innerHTML = '';
+      const chatHistory = document.getElementById('chatHistory');
+      const newChatItem = document.createElement('div');
+      newChatItem.classList.add('chat-item');
+      newChatItem.textContent = 'New Chat ' + (document.querySelectorAll('.chat-item').length + 1);
+      newChatItem.onclick = () => selectChat(newChatItem);
+      chatHistory.appendChild(newChatItem);
+
+      document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+      newChatItem.classList.add('active');
+    });
+  </script>
+</body>
+</html>
